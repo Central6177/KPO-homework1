@@ -19,23 +19,20 @@ dotnet run --project Kicksharing.Console
 ## Обязательные вопросы
 
 *   **Какой принцип SOLID применён наиболее явно и где?**
-    *   Наиболее явно применен **Dependency Inversion Principle (DIP)**. Класс `FleetManager` (в `Services.cs`) не зависит от конкретной реализации сервиса техосмотра. 
-    *   Он зависит от абстракции `ITechnicalInspection`. 
-    *   Конкретная реализация внедряется через конструктор (DI), что настраивается в `Program.cs` с помощью DI-контейнера. 
-    *   Также четко прослеживается **Interface Segregation Principle (ISP)**: сущности разделены на `IInventoryAsset`, `IPowerConsumer` и `IRideable` (в `Interfaces.cs`).
+    *   Наиболее явно применен **Dependency Inversion Principle (DIP)**. Класс `FleetManager` (в `Services.cs`) не зависит от конкретной реализации сервиса техосмотра. Он зависит от абстракции `ITechnicalInspection`. 
+    *   Также четко прослеживается **Interface Segregation Principle (ISP)**: Характеристики объектов разделены на узкие интерфейсы (IInventoryAsset, IPowerConsumer, IRideable).
 
 *   **Какой принцип сознательно ограничен / «почти нарушен» и почему это приемлемо?**
-    *   Ограничен **Open/Closed Principle (OCP)** в классе `FleetManager`. 
-    *   Там реализованы два отдельных метода для постановки на баланс: `RegisterTransport(IRideable)` и `RegisterEquipment(Equipment)`. 
+    *   Ограничен **Open/Closed Principle (OCP)** в классе `FleetManager`. Там реализованы два отдельных метода для постановки на баланс: `RegisterTransport(IRideable)` и `RegisterEquipment(Equipment)`. 
 
 *   **Что сломается (или не сломается) при добавлении нового вида транспорта, сотрудника или склада запчастей?**
     *   *Новый вид транспорта* (например, гироскутер) **не сломает** систему. Достаточно унаследовать его от `TransportBase` (и `IPowerConsumer`, если нужно) и передать в `FleetManager.RegisterTransport`(заранее доработав).
-    *   *Сотрудники или склад запчастей* потребуют модификации кода. В `FleetManager` нет методов для приема сотрудников, так как они не `IInventoryAsset`. Запчасти не подходят ни под `Equipment`, ни под `IRideable`. Потребуется расширять бизнес-логику и интерфейсы.
+    *   *Сотрудники или склад запчастей* потребуют изменения кода. В `FleetManager` нет методов для приема сотрудников, так как они не `IInventoryAsset`. Запчасти не подходят ни под `Equipment`, ни под `IRideable`. Потребуется дорабатывать бизнес-логику и интерфейсы.
 
 *   **Какой тест фиксирует решение техосмотра и/или правило «для новичков»; как подменяется зависимость?**
     *   *Правило техосмотра* проверяется в тесте `AddTransport_WhenInspectionRejected_DoesNotAddToFleet` (в `ParkTests.cs`). 
     *   *Правило для новичков* проверяется в тесте `FilterForNovices_ReturnsOnlyItemsWithHighUsability`.
-    *   *Подмена зависимости* реализована через паттерн **Fake**: создан класс `FakeTechService`, реализующий `ITechnicalInspection`. В нем можно вручную переключать свойство `WillPassInspection` для симуляции прохождения техосмотра.
+    *   *Подмена зависимости* реализована через паттерн **Fake**: создан класс `FakeTechService`, реализующий `ITechnicalInspection`.
 
 *   **Роль ИИ в разработке:**
     *   ИИ использовался при проверке задания по критериям и примерной оценке работы.
